@@ -1,0 +1,60 @@
+version: '2'
+
+services:
+  web: 
+    restart: always
+    build:
+      context: ./
+      dockerfile: web.docker
+    volumes:
+      - ./:/var/www
+      - /etc/letsencrypt/:/etc/letsencrypt
+    ports: 
+      - "7081:80"
+    links:
+      - app
+    depends_on:
+      - app
+      - db
+    networks: 
+      base:
+        ipv4_address: 173.50.0.2
+
+  app:
+    restart: always
+    build:
+      context: ./
+      dockerfile: app.docker
+    volumes:
+      - ./:/var/www
+    links:
+      - db
+    environment:
+      - "DB_HOST=3306"
+      - "DB_HOST=db"
+    networks: 
+      base:
+        ipv4_address: 173.50.0.3
+  db:
+    restart: always
+    image: mysql:5.7
+    volumes:
+      - /var/www/databases/jiggle-dev/mysql_data:/var/lib/mysql
+      - ./:/var/www
+    environment:
+      - "MYSQL_ROOT_PASSWORD=admin@jiggle123"
+      - "MYSQL_DATABASE=jiggle-dev"
+    ports:
+      - "33076:3306"
+    networks: 
+      base:
+        ipv4_address: 173.50.0.4 
+
+networks:
+    base:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+            - subnet: 173.50.0.0/16
+              gateway: 173.50.0.1
