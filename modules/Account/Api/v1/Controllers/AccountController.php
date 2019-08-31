@@ -11,7 +11,8 @@ use Speakout\Modules\BaseController as Controller;
 use JWTAuth;
 
 
-class AccountController extends Controller {
+class AccountController extends Controller
+{
 
 
     /**
@@ -31,11 +32,12 @@ class AccountController extends Controller {
      * @param UserRepository $users
      * @param UserTransformer $userTransformer
      */
-	public function __construct(UserRepository $users,
-                                UserTransformer $userTransformer)
-    {
+    public function __construct(
+        UserRepository $users,
+        UserTransformer $userTransformer
+    ) {
         $this->users = $users;
-		$this->userTransformer = $userTransformer;
+        $this->userTransformer = $userTransformer;
     }
 
 
@@ -45,11 +47,11 @@ class AccountController extends Controller {
      * @param SignupRequest $request
      * @return bool|\Jiggle\Modules\Account\Models\User
      */
-	public function signup(SignupRequest $request) {
+    public function signup(SignupRequest $request)
+    {
 
         return $this->users->createAccount($request);
-
-	}
+    }
 
 
     /**
@@ -57,9 +59,10 @@ class AccountController extends Controller {
      * @param LoginRequest $request
      * @return bool|\Illuminate\Http\JsonResponse
      */
-	public function login(LoginRequest $request) {
-		return $this->users->login($request);
-	}
+    public function login(LoginRequest $request)
+    {
+        return $this->users->login($request);
+    }
 
 
     /**
@@ -67,12 +70,12 @@ class AccountController extends Controller {
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-	public function logout(Request $request){
-        JWTAuth::invalidate($request->token);
+    public function logout()
+    {
 
-        return $this->success(["message"=>"Successfully logged out"]);
+        auth()->logout();
+        auth()->logout(true);
+
+        return $this->success(["message" => "Successfully logged out"]);
     }
-
-
-   
 }
