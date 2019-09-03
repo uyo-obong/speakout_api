@@ -4,7 +4,7 @@ namespace Speakout\Modules\Account\Api\v1\Requests;
 
 use Dingo\Api\Http\FormRequest;
 
-class SignupRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,15 +24,12 @@ class SignupRequest extends FormRequest
     public function rules()
     {
         return [
-            'userEmail'     => 'required|email|unique:users',
-            'password'      => 'required|min:6',
-            'fullName'      => 'required|string',
-            'address'       => 'required|string',
-            'contactNo'     => 'required|numeric',
-            'state'         => 'required|string',
-            'country'       => 'required|string',
-            'pincode'       => 'required|string',
-            
+            'userEmail'     => 'email',
+            'password'      => 'min:6',
+            'fullName'      => 'string',
+            'address'       => 'string',
+            'contactNo'     => 'numeric',
+
         ];
     }
 
@@ -44,7 +41,7 @@ class SignupRequest extends FormRequest
             'userEmail.unique'   =>'Account already exists for the email provided, Login to add another company instead.',
             'password.required'  => 'Password is required to create your account',
             'fullName.required'  => 'Full Name is required',
-            'contactNo.numeric'  => 'Contact No must be numeric values'
+            'contactNo.numeric'    =>'Contact No must be numeric values'
         ];
     }
 }

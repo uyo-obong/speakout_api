@@ -14,6 +14,10 @@ class CategoryRepository extends BaseRepository
      */
     private $category;
 
+    /**
+     * @var SubCategory
+     *
+     */
     private  $subcategory;
 
     /**
@@ -47,5 +51,16 @@ class CategoryRepository extends BaseRepository
     {
         return $this->subcategory->all();
     }
+
+    public function getCategoryByAgencies()
+    {
+        return  $this->category->where('categoryName', 'Agencies')->first();
+    }
+
+    public function getCategoryByExcecutive()
+    {
+        return  $this->category->where('categoryName', 'Executive')->first();
+    }
+
 
 }

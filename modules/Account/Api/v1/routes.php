@@ -30,17 +30,24 @@ $api->version('v1', [], function (\Dingo\Api\Routing\Router $api) {
             //User authenticated routes
             $api->group(["middleware" => "jwt.auth"], function () use ($api) {
 
+                $api->post("update/profile/{userId}", "AccountController@updateUser");
                 $api->get("logout", "AccountController@logout");
 
                 // List all categories
                 $api->group(['prefix' => 'category'], function () use ($api) {
                     $api->get('list', 'CategoryController@listCategories');
+                    // List sub categories by agency
+                    $api->get('by/agencies', 'CategoryController@getCategoryByAgencies');
+                    // List  sub categories by executive
+                    $api->get('by/excecutive', 'CategoryController@getCategoryByExcecutive');
+
                 });
 
                 // List all sub categories
                 $api->group(['prefix' => 'subcategory'], function () use ($api) {
                     $api->get('list', 'CategoryController@listSubCategory');
                 });
+
 
             });
         });

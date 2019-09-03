@@ -13,6 +13,8 @@
             <div class="row">
                 <div class="col-md-12">
                     ... your content here ...
+                    
+                    <img src="{{ url('user_images/speakout_user_1567432929.jpg') }}">
                 </div>
             </div>
         </div>

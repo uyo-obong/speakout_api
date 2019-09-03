@@ -4,11 +4,11 @@ namespace Speakout\Modules\Account\Api\v1\Repositories;
 
 use DB;
 use Hash;
+use Illuminate\Support\Facades\Storage;
 use Speakout\Modules\Account\Api\v1\Transformers\UserTransformer;
 use Speakout\Modules\Account\Models\Profile;
 use Speakout\Modules\Account\Models\User;
 use Speakout\Modules\BaseRepository;
-use Tymon\JWTAuth\Exceptions\JWTException;
 
 
 class UserRepository extends BaseRepository
@@ -28,6 +28,36 @@ class UserRepository extends BaseRepository
         $this->users = $user;
     }
 
+    public function updateUser(array $data, $userId)
+    {
+
+        $data = (object)$data;
+
+        // $user = auth()->user()->findOrFail($userId);
+
+        // $userImage = $user->userImage;
+        // $oldName = explode("/", $userImage);
+
+        // //delete old profile image if exist
+        // if(!empty($data->userImage)){
+        //   $checkOld =  Storage::disk('public')->exists($oldName[1]);
+        //   if ($checkOld)
+        //         Storage::disk('public')->delete($oldName[1]);
+        // }
+
+
+        $user->fullName      = ucwords($data->fullName);
+        $user->userEmail     = strtolower($data->userEmail);
+        $user->address       = $data->address;
+        $user->contactNo     = $data->contactNo;
+        $user->userImage     = $data->userImage;
+        $user->password      = Hash::make($data->password);
+        $user->updationDate  = currentTime();
+        $user->save();
+
+        return $user;
+    }
+
 
     /**
      * @param $data
@@ -36,6 +66,7 @@ class UserRepository extends BaseRepository
      */
     public function createAccount($data, $session = null)
     {
+
         $user = User::create([
             'fullName'      => ucwords($data->fullName),
             'userEmail'     => strtolower($data->userEmail),
@@ -48,6 +79,7 @@ class UserRepository extends BaseRepository
             'password'      => Hash::make($data->password),
             'regDate'       => currentTime(),
             'updationDate'  => currentTime(),
+            'status'        => 1
 
 
         ]);
@@ -74,21 +106,39 @@ class UserRepository extends BaseRepository
     public function login($data, $session = null)
     {
 
-        $credentials = collect($data)->only(['userEmail', 'password']);
+        // Grab details from the request
+        $credentials = $data->only('userEmail', 'password');
+        
+        try {
+            //Attemt to verify the credentials and create a token for the user
+            
 
-        if ($token = auth()->attempt($credentials->toArray())) {
+            $token = auth()->attempt($credentials);
 
-            $user = auth()->user();
-
-            $user = fractal($user, new UserTransformer())->serializeWith(new \Spatie\Fractalistic\ArraySerializer());
-           
-
-            return response()->json(["status" => "success", "user" => $user, "token" => $token]);
+            if (!$token) {
+                return response()->json(['status' => 'error', 'message' => 'Incorrect email or password'], 401);
+            }
+        } catch (JWTexception $e) {
+            return response()->json(['status' => 'error', 'message' => 'You cannot login at this time'], 500);
         }
+
+
+        $user = User::where('userEmail', $data->userEmail)->first();
+
+        if (!$user)
+            return response()->json(['status' => 'error', 'message' => 'You are not an admin user'], 401);
+
+
+        $details = fractal($user, new UserTransformer())->serializeWith(new \Spatie\Fractalistic\ArraySerializer());
+        //All good so return the token
+        return response()->json(['status' => 'success', 'data' => $details, 'token' => $token]);
     }
 
 
 
     public function logout()
     { }
+
+
+
 }
