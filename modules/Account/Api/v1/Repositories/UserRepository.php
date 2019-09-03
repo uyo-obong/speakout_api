@@ -28,34 +28,38 @@ class UserRepository extends BaseRepository
         $this->users = $user;
     }
 
-    public function updateUser(array $data, $userId)
+
+    public function updateUser(array $data)
     {
 
         $data = (object)$data;
 
-        // $user = auth()->user()->findOrFail($userId);
 
-        // $userImage = $user->userImage;
-        // $oldName = explode("/", $userImage);
+        $userImage = auth()->user()->userImage;
+        $oldName = explode("/", $userImage);
 
-        // //delete old profile image if exist
-        // if(!empty($data->userImage)){
-        //   $checkOld =  Storage::disk('public')->exists($oldName[1]);
-        //   if ($checkOld)
-        //         Storage::disk('public')->delete($oldName[1]);
-        // }
+        //delete old profile image if exist
+        if(!empty($data->userImage)){
+            $checkOld =  Storage::disk('public')->exists($oldName[1]);
+            if ($checkOld)
+                Storage::disk('public')->delete($oldName[1]);
+        }
 
+        $user = $this->users->where('id', auth()->user()->id)->update([
 
-        $user->fullName      = ucwords($data->fullName);
-        $user->userEmail     = strtolower($data->userEmail);
-        $user->address       = $data->address;
-        $user->contactNo     = $data->contactNo;
-        $user->userImage     = $data->userImage;
-        $user->password      = Hash::make($data->password);
-        $user->updationDate  = currentTime();
-        $user->save();
+            'fullName'      => ucwords($data->fullName),
+            'userEmail'     => strtolower($data->userEmail),
+            'address'       => $data->address,
+            'contactNo'     => $data->contactNo,
+            'userImage'     => $data->userImage,
+            'password'      => Hash::make($data->password),
+            'updationDate'  => currentTime(),
 
-        return $user;
+        ]);
+
+        if ($user == true)
+            return auth()->user();
+
     }
 
 
@@ -76,7 +80,7 @@ class UserRepository extends BaseRepository
             'country'       => $data->country,
             'pincode'       => $data->pincode,
             'userImage'     => $data->userImage,
-            'password'      => Hash::make($data->password),
+            'password'      => md5($data->password),
             'regDate'       => currentTime(),
             'updationDate'  => currentTime(),
             'status'        => 1
@@ -107,12 +111,11 @@ class UserRepository extends BaseRepository
     {
 
         // Grab details from the request
+
         $credentials = $data->only('userEmail', 'password');
         
         try {
             //Attemt to verify the credentials and create a token for the user
-            
-
             $token = auth()->attempt($credentials);
 
             if (!$token) {

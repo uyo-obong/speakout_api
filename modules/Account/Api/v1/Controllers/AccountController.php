@@ -46,9 +46,10 @@ class AccountController extends Controller
      * @param $userId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateUser(UpdateUserRequest $request, $userId)
+    public function updateUser(UpdateUserRequest $request)
     {
-        $user = $this->users->updateUser($request->all(), $userId);
+        $user = $this->users->updateUser($request->all());
+
         if ($user)
             return $this->transform($user, $this->userTransformer);
     }

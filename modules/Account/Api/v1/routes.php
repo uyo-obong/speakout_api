@@ -30,7 +30,7 @@ $api->version('v1', [], function (\Dingo\Api\Routing\Router $api) {
             //User authenticated routes
             $api->group(["middleware" => "jwt.auth"], function () use ($api) {
 
-                $api->post("update/profile/{userId}", "AccountController@updateUser");
+                $api->post("update/profile", "AccountController@updateUser");
                 $api->get("logout", "AccountController@logout");
 
                 // List all categories
