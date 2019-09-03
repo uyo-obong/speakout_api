@@ -147,7 +147,7 @@ class ComplaintRepository extends BaseRepository
         $complaint->complaintType    = $data->complaintType;
         $complaint->noc              = $data->noc;
         $complaint->complaintDetails = $data->complaintDetails;
-        $complaint->complaintFile    = 'user_images/'.imageUploader($data);
+        $complaint->complaintFile    = $data->complaintFile;
         $complaint->regDate          = currentTime();
         $complaint->lastUpdationDate = currentTime();
 

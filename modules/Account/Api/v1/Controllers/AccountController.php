@@ -49,6 +49,7 @@ class AccountController extends Controller
     public function updateUser(UpdateUserRequest $request)
     {
         $user = $this->users->updateUser($request->all());
+
         if ($user)
             return $this->transform($user, $this->userTransformer);
     }

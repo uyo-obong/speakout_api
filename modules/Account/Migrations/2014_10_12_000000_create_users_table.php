@@ -26,7 +26,7 @@ class CreateUsersTable extends Migration
             $table->string('userImage');
             $table->string('regDate');
             $table->string('updationDate');
-            $table->integer('status')->default(1);
+            $table->integer('status');
         });
     }
 

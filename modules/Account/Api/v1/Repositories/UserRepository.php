@@ -28,10 +28,12 @@ class UserRepository extends BaseRepository
         $this->users = $user;
     }
 
+
     public function updateUser(array $data)
     {
 
         $data = (object)$data;
+
 
         $userImage = auth()->user()->userImage;
         $oldName = explode("/", $userImage);
@@ -49,7 +51,7 @@ class UserRepository extends BaseRepository
             'userEmail'     => strtolower($data->userEmail),
             'address'       => $data->address,
             'contactNo'     => $data->contactNo,
-            'userImage'     => 'user_images/'.imageUploader($data),
+            'userImage'     => $data->userImage,
             'password'      => Hash::make($data->password),
             'updationDate'  => currentTime(),
 
@@ -57,6 +59,7 @@ class UserRepository extends BaseRepository
 
         if ($user == true)
             return auth()->user();
+
     }
 
 
@@ -76,10 +79,11 @@ class UserRepository extends BaseRepository
             'state'         => $data->state,
             'country'       => $data->country,
             'pincode'       => $data->pincode,
-            'userImage'     => 'user_images/'.imageUploader($data),
+            'userImage'     => $data->userImage,
             'password'      => md5($data->password),
             'regDate'       => currentTime(),
             'updationDate'  => currentTime(),
+            'status'        => 1
 
 
         ]);
@@ -107,15 +111,12 @@ class UserRepository extends BaseRepository
     {
 
         // Grab details from the request
-        $credentials = ['userEmail' => $data->userEmail, 'password' => $data->password];
 
+        $credentials = $data->only('userEmail', 'password');
+        
         try {
             //Attemt to verify the credentials and create a token for the user
-            $user =  User::where('userEmail', $credentials['userEmail'])
-                ->wherePassword(md5($credentials['password']))
-                ->first();
-
-            $token = auth()->login($user);
+            $token = auth()->attempt($credentials);
 
             if (!$token) {
                 return response()->json(['status' => 'error', 'message' => 'Incorrect email or password'], 401);
