@@ -80,7 +80,7 @@ class UserRepository extends BaseRepository
             'country'       => $data->country,
             'pincode'       => $data->pincode,
             'userImage'     => $data->userImage,
-            'password'      => md5($data->password),
+            'password'      => Hash::make($data->password),
             'regDate'       => currentTime(),
             'updationDate'  => currentTime(),
             'status'        => 1
