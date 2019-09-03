@@ -35,15 +35,15 @@ class UserRepository extends BaseRepository
         $data = (object)$data;
 
 
-        $userImage = auth()->user()->userImage;
-        $oldName = explode("/", $userImage);
-
-        //delete old profile image if exist
-        if(!empty($data->userImage)){
-            $checkOld =  Storage::disk('public')->exists($oldName[1]);
-            if ($checkOld)
-                Storage::disk('public')->delete($oldName[1]);
-        }
+//        $userImage = auth()->user()->userImage;
+//        $oldName = explode("/", $userImage);
+//
+//        //delete old profile image if exist
+//        if(!empty($data->userImage)){
+//            $checkOld =  Storage::disk('public')->exists($oldName[1]);
+//            if ($checkOld)
+//                Storage::disk('public')->delete($oldName[1]);
+//        }
 
         $user = $this->users->where('id', auth()->user()->id)->update([
 
