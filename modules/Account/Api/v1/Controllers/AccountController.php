@@ -3,6 +3,7 @@
 namespace Speakout\Modules\Account\Api\v1\Controllers;
 
 use Dingo\Api\Contract\Http\Request;
+use Speakout\Modules\Account\Api\v1\Requests\UpdateUserRequest;
 use Speakout\Modules\Account\Api\v1\Transformers\UserTransformer;
 use Speakout\Modules\Account\Api\v1\Repositories\UserRepository;
 use Speakout\Modules\Account\Api\v1\Requests\SignupRequest;
@@ -32,20 +33,30 @@ class AccountController extends Controller
      * @param UserRepository $users
      * @param UserTransformer $userTransformer
      */
-    public function __construct(
-        UserRepository $users,
-        UserTransformer $userTransformer
-    ) {
+    public function __construct(UserRepository $users,
+                                UserTransformer $userTransformer) {
         $this->users = $users;
         $this->userTransformer = $userTransformer;
     }
 
 
+    /**
+     * Handdle request for updating user account
+     * @param UpdateUserRequest $request
+     * @param $userId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateUser(UpdateUserRequest $request)
+    {
+        $user = $this->users->updateUser($request->all());
+        if ($user)
+            return $this->transform($user, $this->userTransformer);
+    }
 
     /**
      * Creates a new User account
      * @param SignupRequest $request
-     * @return bool|\Jiggle\Modules\Account\Models\User
+     * @return bool|\Speakout\Modules\Account\Models\User
      */
     public function signup(SignupRequest $request)
     {
@@ -72,10 +83,8 @@ class AccountController extends Controller
      */
     public function logout()
     {
-
         auth()->logout();
         auth()->logout(true);
-
         return $this->success(["message" => "Successfully logged out"]);
     }
 }

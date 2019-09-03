@@ -4,11 +4,11 @@ namespace Speakout\Modules\Account\Api\v1\Repositories;
 
 use DB;
 use Hash;
+use Illuminate\Support\Facades\Storage;
 use Speakout\Modules\Account\Api\v1\Transformers\UserTransformer;
 use Speakout\Modules\Account\Models\Profile;
 use Speakout\Modules\Account\Models\User;
 use Speakout\Modules\BaseRepository;
-use Tymon\JWTAuth\Exceptions\JWTException;
 
 
 class UserRepository extends BaseRepository
@@ -28,6 +28,37 @@ class UserRepository extends BaseRepository
         $this->users = $user;
     }
 
+    public function updateUser(array $data)
+    {
+
+        $data = (object)$data;
+
+        $userImage = auth()->user()->userImage;
+        $oldName = explode("/", $userImage);
+
+        //delete old profile image if exist
+        if(!empty($data->userImage)){
+            $checkOld =  Storage::disk('public')->exists($oldName[1]);
+            if ($checkOld)
+                Storage::disk('public')->delete($oldName[1]);
+        }
+
+        $user = $this->users->where('id', auth()->user()->id)->update([
+
+            'fullName'      => ucwords($data->fullName),
+            'userEmail'     => strtolower($data->userEmail),
+            'address'       => $data->address,
+            'contactNo'     => $data->contactNo,
+            'userImage'     => 'user_images/'.imageUploader($data),
+            'password'      => Hash::make($data->password),
+            'updationDate'  => currentTime(),
+
+        ]);
+
+        if ($user == true)
+            return auth()->user();
+    }
+
 
     /**
      * @param $data
@@ -36,6 +67,7 @@ class UserRepository extends BaseRepository
      */
     public function createAccount($data, $session = null)
     {
+
         $user = User::create([
             'fullName'      => ucwords($data->fullName),
             'userEmail'     => strtolower($data->userEmail),
@@ -44,8 +76,8 @@ class UserRepository extends BaseRepository
             'state'         => $data->state,
             'country'       => $data->country,
             'pincode'       => $data->pincode,
-            'userImage'     => $data->userImage,
-            'password'      => Hash::make($data->password),
+            'userImage'     => 'user_images/'.imageUploader($data),
+            'password'      => md5($data->password),
             'regDate'       => currentTime(),
             'updationDate'  => currentTime(),
 
@@ -74,21 +106,41 @@ class UserRepository extends BaseRepository
     public function login($data, $session = null)
     {
 
-        $credentials = collect($data)->only(['userEmail', 'password']);
+        // Grab details from the request
+        $credentials = ['userEmail' => $data->userEmail, 'password' => $data->password];
 
-        if ($token = auth()->attempt($credentials->toArray())) {
+        try {
+            //Attemt to verify the credentials and create a token for the user
+            $user =  User::where('userEmail', $credentials['userEmail'])
+                ->wherePassword(md5($credentials['password']))
+                ->first();
 
-            $user = auth()->user();
+            $token = auth()->login($user);
 
-            $user = fractal($user, new UserTransformer())->serializeWith(new \Spatie\Fractalistic\ArraySerializer());
-           
-
-            return response()->json(["status" => "success", "user" => $user, "token" => $token]);
+            if (!$token) {
+                return response()->json(['status' => 'error', 'message' => 'Incorrect email or password'], 401);
+            }
+        } catch (JWTexception $e) {
+            return response()->json(['status' => 'error', 'message' => 'You cannot login at this time'], 500);
         }
+
+
+        $user = User::where('userEmail', $data->userEmail)->first();
+
+        if (!$user)
+            return response()->json(['status' => 'error', 'message' => 'You are not an admin user'], 401);
+
+
+        $details = fractal($user, new UserTransformer())->serializeWith(new \Spatie\Fractalistic\ArraySerializer());
+        //All good so return the token
+        return response()->json(['status' => 'success', 'data' => $details, 'token' => $token]);
     }
 
 
 
     public function logout()
     { }
+
+
+
 }

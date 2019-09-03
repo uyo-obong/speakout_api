@@ -5,6 +5,7 @@ namespace Speakout\Modules\Account\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Speakout\Modules\Complaint\Models\Complaint;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
@@ -13,8 +14,7 @@ class User extends Authenticatable implements JWTSubject
     use Notifiable;
 
 
-    protected $updated_at = false;
-    protected $created_at = false;
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -22,7 +22,8 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'id', 'fullName','userEmail', 'address', 'contactNo','state', 'country', 'pincode', 'userImage', 'password', 'regDate', 'updationDate'
+        'id', 'fullName','userEmail', 'address', 'contactNo',
+        'state', 'country', 'pincode', 'userImage', 'password', 'regDate', 'updationDate'
     ];
 
     /**
@@ -55,6 +56,15 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    
+    /**
+     * Handle compalint relationship
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class, 'userId');
+    }
+
 
 }

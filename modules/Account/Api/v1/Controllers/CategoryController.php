@@ -63,4 +63,18 @@ class CategoryController extends Controller
         if ($sub)
             return $this->transform($sub, $this->subTransformer);
     }
+
+    public function getCategoryByAgencies()
+    {
+        $agency = $this->category->getCategoryByAgencies();
+        if ($agency)
+            return $this->transform($agency, $this->catTransformer);
+    }
+
+    public function getCategoryByExcecutive()
+    {
+        $executive = $this->category->getCategoryByExcecutive();
+        if ($executive)
+            return $this->transform($executive, $this->catTransformer);
+    }
 }

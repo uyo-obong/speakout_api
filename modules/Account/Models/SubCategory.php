@@ -25,4 +25,13 @@ class SubCategory extends Model
     }
 
 
+    /**
+     * Handle compalint relationship
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class, 'subcategoryid');
+    }
 }
